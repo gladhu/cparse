@@ -30,6 +30,7 @@ class packToken {
   packToken(size_t s) : base(new Token<int64_t>(s, INT)) {}
   packToken(float f) : base(new Token<double>(f, REAL)) {}
   packToken(double d) : base(new Token<double>(d, REAL)) {}
+  packToken(const void* p) : base(new Token<const void *>(p, POINT)) {}
   packToken(const char* s) : base(new Token<std::string>(s, STR)) {}
   packToken(const std::string& s) : base(new Token<std::string>(s, STR)) {}
   packToken(const TokenMap& map);
@@ -55,6 +56,7 @@ class packToken {
   Tuple& asTuple() const;
   STuple& asSTuple() const;
   Function* asFunc() const;
+  void *asPoint() const;
 
   // Specialize this template to your types, e.g.:
   // MyType& m = packToken.as<MyType>();

@@ -196,6 +196,15 @@ Function* packToken::asFunc() const {
   return static_cast<Function*>(base);
 }
 
+void* packToken::asPoint() const
+{
+  if (base->type != POINT) {
+    throw bad_cast(
+      "The Token is not a function!");
+  }
+  return (static_cast<Token<void *>*>(base))->val;
+}
+
 std::string packToken::str(uint32_t nest) const {
   return packToken::str(base, nest);
 }
