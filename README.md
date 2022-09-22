@@ -36,6 +36,7 @@ If you want to use this library in your project please take a look at our [Wiki]
 ## Setup
 
 ### Download and Compile
+windows: just open visual studio project
 
 ```bash
 cd 'my/project/dir'
