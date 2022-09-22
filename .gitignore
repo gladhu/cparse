@@ -1,2 +1,6 @@
 test-shunting-yard
 *.o
+x64/Debug
+.vs/TestParser/v16
+Debug
+*.user
