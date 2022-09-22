@@ -279,7 +279,7 @@ struct calculator::RAII_TokenQueue_t : TokenQueue_t {
 
 TokenQueue_t calculator::toRPN(const char* expr,
                                TokenMap vars, const char* delim,
-                               const char** rest, Config_t config) {
+                               const char** rest, const Config_t& config) {
   rpnBuilder data(vars, config.opPrecedence);
   char* nextChar;
 

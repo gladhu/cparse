@@ -275,24 +275,20 @@ struct parserMap_t {
     cmap[c] = parser;
   }
 
-  rWordParser_t* find(const std::string text) {
-    rWordMap_t::iterator w_it;
-
-    if ((w_it=wmap.find(text)) != wmap.end()) {
+  rWordParser_t* find(const std::string text) const {
+    const auto w_it = wmap.find(text);
+    if (w_it != wmap.end()) {
       return w_it->second;
     }
-
-    return 0;
+    return nullptr;
   }
 
-  rWordParser_t* find(char c) {
-    rCharMap_t::iterator c_it;
-
-    if ((c_it=cmap.find(c)) != cmap.end()) {
+  rWordParser_t* find(char c) const {
+    const rCharMap_t::const_iterator c_it = cmap.find(c);
+    if (c_it != cmap.end()) {
       return c_it->second;
     }
-
-    return 0;
+    return nullptr;
   }
 };
 
@@ -415,14 +411,14 @@ class calculator {
                               const Config_t& config = Default());
   static TokenQueue_t toRPN(const char* expr, TokenMap vars,
                             const char* delim = 0, const char** rest = 0,
-                            Config_t config = Default());
+                            const Config_t &config = Default());
 
  public:
   // Used to dealloc a TokenQueue_t safely.
   struct RAII_TokenQueue_t;
 
  protected:
-  virtual const Config_t Config() const { return Default(); }
+  virtual const Config_t& Config() const { return Default(); }
 
  private:
   TokenQueue_t RPN;
