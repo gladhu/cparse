@@ -54,18 +54,19 @@ bool match_op_id(opID_t id, opID_t mask) {
 TokenBase* exec_operation(const packToken& left, const packToken& right,
                           evaluationData* data, const std::string& OP_MASK) {
   auto it = data->opMap.find(OP_MASK);
-  if (it == data->opMap.end()) return 0;
+  if (it == data->opMap.end())
+    return nullptr;
   for (const Operation& operation : it->second) {
     if (match_op_id(data->opID, operation.getMask())) {
       try {
         return operation.exec(left, right, data).release();
-      } catch (const Operation::Reject& e) {
+      } catch (...) { //const Operation::Reject& e  compile warning(may be error)
         continue;
       }
     }
   }
 
-  return 0;
+  return nullptr;
 }
 
 inline std::string normalize_op(std::string op) {
