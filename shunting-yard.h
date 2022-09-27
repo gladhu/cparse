@@ -238,7 +238,7 @@ struct rpnBuilder {
 };
 
 class RefToken;
-class opMap_t;
+struct opMap_t;
 struct evaluationData {
   TokenQueue_t rpn;
   TokenMap scope;
