@@ -24,10 +24,10 @@ class packToken {
 
   template<class C>
   packToken(C c, tokType type) : base(new Token<C>(c, type)) {}
-  packToken(int i) : base(new Token<int64_t>(i, INT)) {}
-  packToken(int64_t l) : base(new Token<int64_t>(l, INT)) {}
+  packToken(int i) : base(new Token<int64_t>(i, INTEGRAL)) {}
+  packToken(int64_t l) : base(new Token<int64_t>(l, INTEGRAL)) {}
   packToken(bool b) : base(new Token<uint8_t>(b, BOOL)) {}
-  packToken(size_t s) : base(new Token<int64_t>(s, INT)) {}
+  packToken(size_t s) : base(new Token<int64_t>(s, INTEGRAL)) {}
   packToken(float f) : base(new Token<double>(f, REAL)) {}
   packToken(double d) : base(new Token<double>(d, REAL)) {}
   packToken(const void* p) : base(new Token<const void *>(p, POINT)) {}
