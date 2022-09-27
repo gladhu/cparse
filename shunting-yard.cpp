@@ -330,7 +330,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
       // add the parsed number to the output queue.
       std::string key = rpnBuilder::parseVar(expr, &expr);
 
-      if ((parser=config.parserMap.find(key))) {
+      if ((parser=config.parserMap.find(key)) != nullptr) {
         // Parse reserved words:
         try {
           parser(expr, &expr, &data);
@@ -468,7 +468,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
             }
           } else if (data.opp.exists(op)) {
             data.handle_op(op);
-          } else if ((parser=config.parserMap.find(op[0]))) {
+          } else if ((parser = config.parserMap.find(op[0])) != nullptr) {
             expr = start+1;
             try {
               parser(expr, &expr, &data);
