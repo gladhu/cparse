@@ -1,9 +1,8 @@
-#include <string>
-
-#include "./shunting-yard.h"
-
 #include "./containers.h"
+#include "./shunting-yard.h"
 #include "./functions.h"
+
+#include <string>
 
 using cparse::TokenMap;
 using cparse::packToken;
