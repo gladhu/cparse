@@ -1,2 +1,5 @@
 test-shunting-yard
 *.o
+TestCparse/.vs/TestCparse/v16
+TestCparse
+build
