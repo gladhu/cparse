@@ -20,7 +20,7 @@ class Function : public TokenBase {
  public:
   virtual const std::string name() const = 0;
   virtual const args_t args() const = 0;
-  virtual packToken exec(TokenMap scope) const = 0;
+  virtual packToken exec(TokenMap &scope) const = 0;
   virtual TokenBase* clone() const = 0;
 };
 
@@ -48,7 +48,7 @@ class CppFunction : public Function {
 
   virtual const std::string name() const { return _name; }
   virtual const args_t args() const { return _args; }
-  virtual packToken exec(TokenMap scope) const { return isStdFunc ? stdFunc(scope) : func(scope); }
+  virtual packToken exec(TokenMap &scope) const { return isStdFunc ? stdFunc(scope) : func(scope); }
 
   virtual TokenBase* clone() const {
     return new CppFunction(static_cast<const CppFunction&>(*this));
