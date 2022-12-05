@@ -450,7 +450,7 @@ class calculator {
 #include <string>
 #include<functional>
   typedef std::list<std::string> args_t;
-  struct packToken;
+  class packToken;
 
   class Function : public TokenBase {
   public:
