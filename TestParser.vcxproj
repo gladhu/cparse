@@ -156,7 +156,6 @@
   <ItemGroup>
     <ClCompile Include="builtin-features.cpp" />
     <ClCompile Include="containers.cpp" />
-    <ClCompile Include="functions.cpp" />
     <ClCompile Include="packToken.cpp" />
     <ClCompile Include="shunting-yard.cpp" />
     <ClCompile Include="TestParser.cpp" />
@@ -168,7 +167,6 @@
     <ClInclude Include="builtin-features\reservedWords.inc" />
     <ClInclude Include="builtin-features\typeSpecificFunctions.inc" />
     <ClInclude Include="containers.h" />
-    <ClInclude Include="functions.h" />
     <ClInclude Include="packToken.h" />
     <ClInclude Include="shunting-yard-exceptions.h" />
     <ClInclude Include="shunting-yard.h" />
