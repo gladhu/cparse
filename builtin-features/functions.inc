@@ -16,7 +16,7 @@ packToken default_print(TokenMap scope) {
       std::cout << " ";
     }
 
-    if (item->type == STR) {
+    if (item->type == STR_Token) {
       std::cout << item.asString();
     } else {
       std::cout << item.str();
@@ -32,7 +32,7 @@ packToken default_sum(TokenMap scope) {
   // Get the arguments:
   TokenList list = scope["args"].asList();
 
-  if (list.list().size() == 1 && list.list().front()->type == LIST) {
+  if (list.list().size() == 1 && list.list().front()->type == LIST_Token) {
     list = list.list().front().asList();
   }
 
@@ -52,7 +52,7 @@ packToken default_eval(TokenMap scope) {
 
 packToken default_float(TokenMap scope) {
   packToken tok = scope["value"];
-  if (tok->type & NUM) return tok.asDouble();
+  if (tok->type & NUM_Token) return tok.asDouble();
 
   // Convert it to double:
   char* rest;
@@ -70,7 +70,7 @@ packToken default_float(TokenMap scope) {
 
 packToken default_int(TokenMap scope) {
   packToken tok = scope["value"];
-  if (tok->type & NUM) return tok.asInt();
+  if (tok->type & NUM_Token) return tok.asInt();
 
   // Convert it to double:
   char* rest;
@@ -89,7 +89,7 @@ packToken default_int(TokenMap scope) {
 packToken default_str(TokenMap scope) {
   // Return its string representation:
   packToken tok = scope["value"];
-  if (tok->type == STR) return tok;
+  if (tok->type == STR_Token) return tok;
   return tok.str();
 }
 
@@ -98,20 +98,20 @@ packToken default_type(TokenMap scope) {
   packToken* p_type;
 
   switch (tok->type) {
-  case NONE: return "none";
-  case VAR: return "variable";
-  case REAL: return "real";
-  case INTEGRAL: return "integer";
-  case BOOL: return "boolean";
-  case STR: return "string";
-  case FUNC: return "function";
-  case IT: return "iterable";
-  case TUPLE: return "tuple";
-  case STUPLE: return "argument tuple";
-  case LIST: return "list";
-  case MAP:
+  case NONE_Token: return "none";
+  case VAR_Token: return "variable";
+  case REAL_Token: return "real";
+  case INT_Token: return "integer";
+  case BOOL_Token: return "boolean";
+  case STR_Token: return "string";
+  case FUNC_Token: return "function";
+  case IT_Token: return "iterable";
+  case TUPLE_Token: return "tuple";
+  case STUPLE_Token: return "argument tuple";
+  case LIST_Token: return "list";
+  case MAP_Token:
     p_type = tok.asMap().find("__type__");
-    if (p_type && (*p_type)->type == STR) {
+    if (p_type && (*p_type)->type == STR_Token) {
       return *p_type;
     } else  {
       return "map";
@@ -167,7 +167,7 @@ packToken default_list(TokenMap scope) {
   TokenList list = scope["args"].asList();
 
   // If the only argument is iterable:
-  if (list.list().size() == 1 && list.list()[0]->type & IT) {
+  if (list.list().size() == 1 && list.list()[0]->type & IT_Token) {
     TokenList new_list;
     Iterator* it = static_cast<Iterable*>(list.list()[0].token())->getIterator();
 
@@ -193,7 +193,7 @@ packToken default_map(TokenMap scope) {
 packToken default_extend(TokenMap scope) {
   packToken tok = scope["value"];
 
-  if (tok->type == MAP) {
+  if (tok->type == MAP_Token) {
     return tok.asMap().getChild();
   } else {
     throw std::runtime_error(tok.str() + " is not extensible!");
@@ -207,7 +207,7 @@ std::string packToken_str(const TokenBase* base, uint32_t nest) {
   // Find the TokenMap with the type specific functions
   // for the type of the base token:
   const TokenMap* typeFuncs;
-  if (base->type == MAP) {
+  if (base->type == MAP_Token) {
     typeFuncs = static_cast<const TokenMap*>(base);
   } else {
     typeFuncs = &calculator::type_attribute_map()[base->type];
@@ -215,7 +215,7 @@ std::string packToken_str(const TokenBase* base, uint32_t nest) {
 
   // Check if this type has a custom stringify function:
   const packToken* p_func = typeFuncs->find("__str__");
-  if (p_func && (*p_func)->type == FUNC) {
+  if (p_func && (*p_func)->type == FUNC_Token) {
     // Return the result of this function passing the
     // nesting level as first (and only) argument:
     func = p_func->asFunc();

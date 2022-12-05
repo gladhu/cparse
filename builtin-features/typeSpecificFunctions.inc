@@ -65,7 +65,7 @@ packToken list_pop(TokenMap scope) {
 
   int64_t pos;
 
-  if ((*token)->type & NUM) {
+  if ((*token)->type & NUM_Token) {
     pos = token->asInt();
 
     // So that pop(-1) is the same as pop(last_idx):
@@ -166,13 +166,13 @@ packToken string_split(TokenMap scope) {
 
 struct Startup {
   Startup() {
-    TokenMap& base_list = calculator::type_attribute_map()[LIST];
+    TokenMap& base_list = calculator::type_attribute_map()[LIST_Token];
     base_list["push"] = CppFunction(list_push, push_args, "push");
     base_list["pop"] = CppFunction(list_pop, list_pop_args, "pop");
     base_list["len"] = CppFunction(list_len, "len");
     base_list["join"] = CppFunction(list_join, {"chars"}, "join");
 
-    TokenMap& base_str = calculator::type_attribute_map()[STR];
+    TokenMap& base_str = calculator::type_attribute_map()[STR_Token];
     base_str["len"] = CppFunction(&string_len, "len");
     base_str["lower"] = CppFunction(&string_lower, "lower");
     base_str["upper"] = CppFunction(&string_upper, "upper");

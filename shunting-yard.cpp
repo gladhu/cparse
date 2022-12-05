@@ -23,13 +23,13 @@ using cparse::typeMap_t;
 using cparse::TokenQueue_t;
 using cparse::evaluationData;
 using cparse::rpnBuilder;
-using cparse::REF;
+using cparse::REF_Token;
 
 /* * * * * Operation class: * * * * */
 
 // Convert a type into an unique mask for bit wise operations:
 uint32_t Operation::mask(tokType_t type) {
-  if (type == ANY_TYPE) {
+  if (type == ANY_TYPE_Token) {
     return 0xFFFF;
   } else {
     return ((type & 0xE0) << 24) | (1 << (type & 0x1F));
@@ -83,7 +83,7 @@ inline std::string normalize_op(std::string op) {
 // Please note that it only deletes memory if the token
 // is of type REF.
 TokenBase* resolve_reference(TokenBase* b, TokenMap* scope = 0) {
-  if (b->type & REF) {
+  if (b->type & REF_Token) {
     // Resolve the reference:
     RefToken* ref = static_cast<RefToken*>(b);
     TokenBase* value = ref->resolve(scope);
@@ -141,14 +141,14 @@ void rpnBuilder::handle_opStack(const std::string& op) {
     while (!opStack.empty() &&
         opp.prec(op) >= opp.prec(opStack.top())) {
       cur_op = normalize_op(opStack.top());
-      rpn.push(new Token<std::string>(cur_op, OP));
+      rpn.push(new Token<std::string>(cur_op, OP_Token));
       opStack.pop();
     }
   } else {
     while (!opStack.empty() &&
         opp.prec(op) > opp.prec(opStack.top())) {
       cur_op = normalize_op(opStack.top());
-      rpn.push(new Token<std::string>(cur_op, OP));
+      rpn.push(new Token<std::string>(cur_op, OP_Token));
       opStack.pop();
     }
   }
@@ -175,7 +175,7 @@ void rpnBuilder::handle_right_unary(const std::string& unary_op) {
   // Add the unary token:
   this->rpn.push(new TokenUnary());
   // Then add the current op directly into the rpn:
-  rpn.push(new Token<std::string>(normalize_op(unary_op), OP));
+  rpn.push(new Token<std::string>(normalize_op(unary_op), OP_Token));
 }
 
 // Find out if op is a binary or unary operator and handle it:
@@ -241,7 +241,7 @@ void rpnBuilder::close_bracket(const std::string& bracket) {
   std::string cur_op;
   while (opStack.size() && opStack.top() != bracket) {
     cur_op = normalize_op(opStack.top());
-    rpn.push(new Token<std::string>(cur_op, OP));
+    rpn.push(new Token<std::string>(cur_op, OP_Token));
     opStack.pop();
   }
 
@@ -316,10 +316,10 @@ TokenQueue_t calculator::toRPN(const char* expr,
 
       // If the number was not a float:
       if (base != 10 || !strchr(".eE", *nextChar)) {
-        data.handle_token(new Token<int64_t>(_int, INTEGRAL));
+        data.handle_token(new Token<int64_t>(_int, INT_Token));
       } else {
         double digit = strtod(expr, &nextChar);
-        data.handle_token(new Token<double>(digit, REAL));
+        data.handle_token(new Token<double>(digit, REAL_Token));
       }
 
       expr = nextChar;
@@ -347,7 +347,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
           data.handle_token(new RefToken(key, copy));
         } else {
           // Save the variable name:
-          data.handle_token(new Token<std::string>(key, VAR));
+          data.handle_token(new Token<std::string>(key, VAR_Token));
         }
       }
     } else if (*expr == '\'' || *expr == '"') {
@@ -386,7 +386,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
                            ") at end of string declaration: " + squote + ss.str() + ".");
       }
       ++expr;
-      data.handle_token(new Token<std::string>(ss.str(), STR));
+      data.handle_token(new Token<std::string>(ss.str(), STR_Token));
     } else {
       // Otherwise, the variable is an operator or paranthesis.
       switch (*expr) {
@@ -497,7 +497,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
   std::string cur_op;
   while (!data.opStack.empty()) {
     cur_op = normalize_op(data.opStack.top());
-    data.rpn.push(new Token<std::string>(cur_op, OP));
+    data.rpn.push(new Token<std::string>(cur_op, OP_Token));
     data.opStack.pop();
   }
 
@@ -535,7 +535,7 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, TokenMap scope,
     data.rpn.pop();
 
     // Operator:
-    if (base->type == OP) {
+    if (base->type == OP_Token) {
       data.op = static_cast<Token<std::string>*>(base)->val;
       delete base;
 
@@ -548,34 +548,34 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, TokenMap scope,
       TokenBase* r_token = evaluation.top(); evaluation.pop();
       TokenBase* l_token = evaluation.top(); evaluation.pop();
 
-      if (r_token->type & REF) {
+      if (r_token->type & REF_Token) {
         data.right.reset(static_cast<RefToken*>(r_token));
         r_token = data.right->resolve(&data.scope);
-      } else if (r_token->type == VAR) {
+      } else if (r_token->type == VAR_Token) {
         packToken key = static_cast<Token<std::string>*>(r_token)->val;
         data.right.reset(new RefToken(key));
       } else {
         data.right.reset(new RefToken());
       }
 
-      if (l_token->type & REF) {
+      if (l_token->type & REF_Token) {
         data.left.reset(static_cast<RefToken*>(l_token));
         l_token = data.left->resolve(&data.scope);
-      } else if (l_token->type == VAR) {
+      } else if (l_token->type == VAR_Token) {
         packToken key = static_cast<Token<std::string>*>(l_token)->val;
         data.left.reset(new RefToken(key));
       } else {
         data.left.reset(new RefToken());
       }
 
-      if (l_token->type == FUNC && data.op == "()") {
+      if (l_token->type == FUNC_Token && data.op == "()") {
         // * * * * * Resolve Function Calls: * * * * * //
 
         Function* l_func = static_cast<Function*>(l_token);
 
         // Collect the parameter tuple:
         Tuple right;
-        if (r_token->type == TUPLE) {
+        if (r_token->type == TUPLE_Token) {
           right = *static_cast<Tuple*>(r_token);
         } else {
           right = Tuple(r_token);
@@ -583,7 +583,7 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, TokenMap scope,
         delete r_token;
 
         packToken _this;
-        if (data.left->origin->type != NONE) {
+        if (data.left->origin->type != NONE_Token) {
           _this = data.left->origin;
         } else {
           _this = data.scope;
@@ -627,7 +627,7 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, TokenMap scope,
           throw undefined_operation(data.op, l_pack, r_pack);
         }
       }
-    } else if (base->type == VAR) {  // Variable
+    } else if (base->type == VAR_Token) {  // Variable
       packToken* value = NULL;
       std::string key = static_cast<Token<std::string>*>(base)->val;
 
@@ -695,7 +695,7 @@ packToken calculator::eval(TokenMap vars, bool keep_refs) const {
 std::unordered_set<std::string> calculator::get_variables() const {
   std::unordered_set<std::string> vars;
   for (const auto& i: RPN) {
-    if (i->type == tokType::VAR) {
+    if (i->type == tokType::VAR_Token) {
       vars.insert(static_cast<Token<std::string>*>(i)->val);
     }
   }
@@ -762,7 +762,7 @@ packToken Function::call(packToken _this, const Function* func,
 
   while (args_it != args->list().end() && names_it != arg_names.end()) {
     // If the positional argument list is over:
-    if ((*args_it)->type == STUPLE) break;
+    if ((*args_it)->type == STUPLE_Token) break;
 
     // Else add it to the local namespace:
     local[*names_it] = *args_it;
@@ -776,7 +776,7 @@ packToken Function::call(packToken _this, const Function* func,
   TokenList arglist;
   for (; args_it != args->list().end(); ++args_it) {
     // If there is a keyword argument:
-    if ((*args_it)->type == STUPLE) break;
+    if ((*args_it)->type == STUPLE_Token) break;
     // Else add it to arglist:
     arglist.list().push_back(*args_it);
   }
@@ -786,7 +786,7 @@ packToken Function::call(packToken _this, const Function* func,
   for (; args_it != args->list().end(); ++args_it) {
     packToken& arg = *args_it;
 
-    if (arg->type != STUPLE) {
+    if (arg->type != STUPLE_Token) {
       throw syntax_error("Positional argument follows keyword argument");
     }
 
@@ -796,7 +796,7 @@ packToken Function::call(packToken _this, const Function* func,
       throw syntax_error("Keyword tuples must have exactly 2 items!");
     }
 
-    if (st->list()[0]->type != STR) {
+    if (st->list()[0]->type != STR_Token) {
       throw syntax_error("Keyword first argument should be of type string!");
     }
 

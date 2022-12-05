@@ -24,15 +24,15 @@ class packToken {
 
   template<class C>
   packToken(C c, tokType type) : base(new Token<C>(c, type)) {}
-  packToken(int i) : base(new Token<int64_t>(i, INTEGRAL)) {}
-  packToken(int64_t l) : base(new Token<int64_t>(l, INTEGRAL)) {}
-  packToken(bool b) : base(new Token<uint8_t>(b, BOOL)) {}
-  packToken(size_t s) : base(new Token<int64_t>(s, INTEGRAL)) {}
-  packToken(float f) : base(new Token<double>(f, REAL)) {}
-  packToken(double d) : base(new Token<double>(d, REAL)) {}
-  packToken(const void* p) : base(new Token<const void *>(p, POINT)) {}
-  packToken(const char* s) : base(new Token<std::string>(s, STR)) {}
-  packToken(const std::string& s) : base(new Token<std::string>(s, STR)) {}
+  packToken(int i) : base(new Token<int64_t>(i, INT_Token)) {}
+  packToken(int64_t l) : base(new Token<int64_t>(l, INT_Token)) {}
+  packToken(bool b) : base(new Token<uint8_t>(b, BOOL_Token)) {}
+  packToken(size_t s) : base(new Token<int64_t>(s, INT_Token)) {}
+  packToken(float f) : base(new Token<double>(f, REAL_Token)) {}
+  packToken(double d) : base(new Token<double>(d, REAL_Token)) {}
+  packToken(const void* p) : base(new Token<const void *>(p, POINT_Token)) {}
+  packToken(const char* s) : base(new Token<std::string>(s, STR_Token)) {}
+  packToken(const std::string& s) : base(new Token<std::string>(s, STR_Token)) {}
   packToken(const TokenMap& map);
   packToken(const TokenList& list);
   ~packToken() { delete base; }

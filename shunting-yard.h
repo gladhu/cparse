@@ -28,31 +28,31 @@ typedef uint8_t tokType_t;
 typedef uint64_t opID_t;
 enum tokType {
   // Internal types:
-  NONE, OP, UNARY, VAR,
+  NONE_Token, OP_Token, UNARY_Token, VAR_Token,
 
   // Base types:
   // Note: The mask system accepts at most 29 (32-3) different base types.
-  STR, FUNC,
+  STR_Token, FUNC_Token,
 
   // Numerals:
-  NUM = 0x20,   // Everything with the bit 0x20 set is a number.
-  REAL = 0x21,  // == 0x20 + 0x1 => Real numbers.
-  INTEGRAL = 0x22,   // == 0x20 + 0x2 => Integral numbers.
-  BOOL = 0x23,  // == 0x20 + 0x3 => Boolean Type.
-  POINT = 0x24,
+  NUM_Token = 0x20,   // Everything with the bit 0x20 set is a number.
+  REAL_Token = 0x21,  // == 0x20 + 0x1 => Real numbers.
+  INT_Token = 0x22,   // == 0x20 + 0x2 => Integral numbers.
+  BOOL_Token = 0x23,  // == 0x20 + 0x3 => Boolean Type.
+  POINT_Token = 0x24,
 
   // Complex types:
-  IT = 0x40,      // Everything with the bit 0x40 set are iterators.
-  LIST = 0x41,    // == 0x40 + 0x01 => Lists are iterators.
-  TUPLE = 0x42,   // == 0x40 + 0x02 => Tuples are iterators.
-  STUPLE = 0x43,  // == 0x40 + 0x03 => ArgTuples are iterators.
-  MAP = 0x44,     // == 0x40 + 0x04 => Maps are Iterators
+  IT_Token = 0x40,      // Everything with the bit 0x40 set are iterators.
+  LIST_Token = 0x41,    // == 0x40 + 0x01 => Lists are iterators.
+  TUPLE_Token = 0x42,   // == 0x40 + 0x02 => Tuples are iterators.
+  STUPLE_Token = 0x43,  // == 0x40 + 0x03 => ArgTuples are iterators.
+  MAP_Token = 0x44,     // == 0x40 + 0x04 => Maps are Iterators
 
   // References are internal tokens used by the calculator:
-  REF = 0x80,
+  REF_Token = 0x80,
 
   // Mask used when defining operations:
-  ANY_TYPE = 0xFF
+  ANY_TYPE_Token = 0xFF
 };
 
 #define ANY_OP ""
@@ -77,14 +77,14 @@ template<class T> class Token : public TokenBase {
 };
   
 struct TokenNone : public TokenBase {
-  TokenNone() : TokenBase(NONE) {}
+  TokenNone() : TokenBase(NONE_Token) {}
   virtual TokenBase* clone() const {
     return new TokenNone(*this);
   }
 };
 
 struct TokenUnary : public TokenBase {
-  TokenUnary() : TokenBase(UNARY) {}
+  TokenUnary() : TokenBase(UNARY_Token) {}
   virtual TokenBase* clone() const {
     return new TokenUnary(*this);
   }
@@ -305,16 +305,16 @@ class RefToken : public TokenBase {
   packToken key;
   packToken origin;
   RefToken(packToken k, TokenBase* v, packToken m = packToken::None()) :
-    TokenBase(v->type | REF), original_value(v), key(std::forward<packToken>(k)), origin(std::forward<packToken>(m)) {}
+    TokenBase(v->type | REF_Token), original_value(v), key(std::forward<packToken>(k)), origin(std::forward<packToken>(m)) {}
   RefToken(packToken k = packToken::None(), packToken v = packToken::None(), packToken m = packToken::None()) :
-    TokenBase(v->type | REF), original_value(std::forward<packToken>(v)), key(std::forward<packToken>(k)), origin(std::forward<packToken>(m)) {}
+    TokenBase(v->type | REF_Token), original_value(std::forward<packToken>(v)), key(std::forward<packToken>(k)), origin(std::forward<packToken>(m)) {}
 
   TokenBase* resolve(TokenMap* localScope = 0) const {
     TokenBase* result = 0;
 
     // Local variables have no origin == NONE,
     // thus, require a localScope to be resolved:
-    if (origin->type == NONE && localScope) {
+    if (origin->type == NONE_Token && localScope) {
       // Get the most recent value from the local scope:
       packToken* r_value = localScope->find(key.asString());
       if (r_value) {
@@ -457,7 +457,7 @@ class calculator {
     static packToken call(packToken _this, const Function* func,
                           TokenList* args, TokenMap scope);
   public:
-    Function() : TokenBase(FUNC) {}
+    Function() : TokenBase(FUNC_Token) {}
     virtual ~Function() {}
 
   public:
