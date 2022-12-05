@@ -1,10 +1,10 @@
-#include "./packToken.h"
-#include "./shunting-yard.h"
-#include "./shunting-yard-exceptions.h"
-
 #include <sstream>
 #include <string>
 #include <iostream>
+
+#include "./shunting-yard.h"
+#include "./packToken.h"
+#include "./shunting-yard-exceptions.h"
 
 using cparse::packToken;
 using cparse::TokenBase;
