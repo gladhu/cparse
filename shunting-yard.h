@@ -585,8 +585,10 @@ struct evaluationData {
   std::string op;
   opID_t opID;
 
-  evaluationData(TokenQueue_t rpn, TokenMap scope, const opMap_t& opMap)
-                : rpn(rpn), scope(scope), opMap(opMap) {}
+  evaluationData(TokenQueue_t rpn, const TokenMap &scope, const opMap_t& opMap)
+    : rpn(rpn), scope(scope), opMap(opMap), opID(0)
+  {
+  }
 };
 
 // The reservedWordParser_t is the function type called when
@@ -738,13 +740,13 @@ class calculator {
   static typeMap_t& type_attribute_map();
 
  public:
-  static packToken calculate(const char* expr, TokenMap vars = &TokenMap::empty,
+  static packToken calculate(const char* expr, const TokenMap &vars = TokenMap::empty,
                              const char* delim = 0, const char** rest = 0);
 
  public:
-  static TokenBase* calculate(const TokenQueue_t& RPN, TokenMap scope,
+  static TokenBase* calculate(const TokenQueue_t& RPN, const TokenMap &scope,
                               const Config_t& config = Default());
-  static TokenQueue_t toRPN(const char* expr, TokenMap vars,
+  static TokenQueue_t toRPN(const char* expr, const TokenMap &vars,
                             const char* delim = 0, const char** rest = 0,
                             const Config_t &config = Default());
 
@@ -765,9 +767,9 @@ class calculator {
   calculator(const char* expr, TokenMap vars = &TokenMap::empty,
              const char* delim = 0, const char** rest = 0,
              const Config_t& config = Default());
-  void compile(const char* expr, TokenMap vars = &TokenMap::empty,
+  void compile(const char* expr, TokenMap &vars = TokenMap::empty,
                const char* delim = 0, const char** rest = 0);
-  packToken eval(TokenMap vars = &TokenMap::empty, bool keep_refs = false) const;
+  packToken eval(const TokenMap &vars = TokenMap::empty, bool keep_refs = false) const;
   std::unordered_set<std::string> get_variables() const;
 
   // Serialization:
@@ -788,7 +790,7 @@ class calculator {
   class Function : public TokenBase {
   public:
     static packToken call(packToken _this, const Function* func,
-                          TokenList* args, TokenMap scope);
+                          TokenList* args, TokenMap &scope);
   public:
     Function() : TokenBase(FUNC_Token) {}
     virtual ~Function() {}

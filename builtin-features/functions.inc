@@ -222,7 +222,7 @@ std::string packToken_str(const TokenBase* base, uint32_t nest) {
     packToken _this = packToken(base->clone());
     TokenList args;
     args.push(static_cast<int64_t>(nest));
-    return Function::call(_this, func, &args, TokenMap()).asString();
+    return Function::call(_this, func, &args, TokenMap::empty).asString();
   }
 
   // Return "" to ask for the normal `packToken::str()`

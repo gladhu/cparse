@@ -279,7 +279,7 @@ struct calculator::RAII_TokenQueue_t : TokenQueue_t {
 /* * * * * calculator class * * * * */
 
 TokenQueue_t calculator::toRPN(const char* expr,
-                               TokenMap vars, const char* delim,
+                               const TokenMap &vars, const char* delim,
                                const char** rest, const Config_t& config) {
   rpnBuilder data(vars, config.opPrecedence);
   char* nextChar;
@@ -339,7 +339,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
           throw;
         }
       } else {
-        packToken* value = vars.find(key);
+        const packToken* value = vars.find(key);
 
         if (value) {
           // Save a reference token:
@@ -507,7 +507,7 @@ TokenQueue_t calculator::toRPN(const char* expr,
   return data.rpn;
 }
 
-packToken calculator::calculate(const char* expr, TokenMap vars,
+packToken calculator::calculate(const char* expr, const TokenMap &vars,
                                 const char* delim, const char** rest) {
   // Convert to RPN with Dijkstra's Shunting-yard algorithm.
   RAII_TokenQueue_t rpn = calculator::toRPN(expr, vars, delim, rest);
@@ -524,7 +524,7 @@ void cleanStack(std::stack<TokenBase*> st) {
   }
 }
 
-TokenBase* calculator::calculate(const TokenQueue_t& rpn, TokenMap scope,
+TokenBase* calculator::calculate(const TokenQueue_t& rpn, const TokenMap &scope,
                                  const Config_t& config) {
   evaluationData data(rpn, scope, config.opMap);
 
@@ -674,7 +674,7 @@ calculator::calculator(const char* expr, TokenMap vars, const char* delim,
   this->RPN = calculator::toRPN(expr, vars, delim, rest, config);
 }
 
-void calculator::compile(const char* expr, TokenMap vars, const char* delim,
+void calculator::compile(const char* expr, TokenMap &vars, const char* delim,
                          const char** rest) {
   // Make sure it is empty:
   rpnBuilder::cleanRPN(&this->RPN);
@@ -682,7 +682,7 @@ void calculator::compile(const char* expr, TokenMap vars, const char* delim,
   this->RPN = calculator::toRPN(expr, vars, delim, rest, Config());
 }
 
-packToken calculator::eval(TokenMap vars, bool keep_refs) const {
+packToken calculator::eval(const TokenMap &vars, bool keep_refs) const {
   TokenBase* value = calculate(this->RPN, vars, Config());
   packToken p = packToken(value->clone());
   if (keep_refs) {
@@ -748,7 +748,7 @@ using cparse::CppFunction;
 
 /* * * * * class Function * * * * */
 packToken Function::call(packToken _this, const Function* func,
-                         TokenList* args, TokenMap scope) {
+                         TokenList* args, TokenMap& scope) {
   // Build the local namespace:
   TokenMap kwargs;
   TokenMap local = scope.getChild();
