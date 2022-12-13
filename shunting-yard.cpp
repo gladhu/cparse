@@ -771,59 +771,59 @@ packToken Function::call(packToken _this, const Function* func,
     ++names_it;
   }
 
-  /* * * * * Parse extra positional arguments: * * * * */
+  // /* * * * * Parse extra positional arguments: * * * * */
+  //
+  // TokenList arglist;
+  // for (; args_it != args->list().end(); ++args_it) {
+  //   // If there is a keyword argument:
+  //   if ((*args_it)->type == STUPLE_Token) break;
+  //   // Else add it to arglist:
+  //   arglist.list().push_back(*args_it);
+  // }
 
-  TokenList arglist;
-  for (; args_it != args->list().end(); ++args_it) {
-    // If there is a keyword argument:
-    if ((*args_it)->type == STUPLE_Token) break;
-    // Else add it to arglist:
-    arglist.list().push_back(*args_it);
-  }
+  // /* * * * * Parse keyword arguments: * * * * */
+  //
+  // for (; args_it != args->list().end(); ++args_it) {
+  //   packToken& arg = *args_it;
+  //
+  //   if (arg->type != STUPLE_Token) {
+  //     throw syntax_error("Positional argument follows keyword argument");
+  //   }
+  //
+  //   STuple* st = static_cast<STuple*>(arg.token());
+  //
+  //   if (st->list().size() != 2) {
+  //     throw syntax_error("Keyword tuples must have exactly 2 items!");
+  //   }
+  //
+  //   if (st->list()[0]->type != STR_Token) {
+  //     throw syntax_error("Keyword first argument should be of type string!");
+  //   }
+  //
+  //   // Save it:
+  //   std::string key = st->list()[0].asString();
+  //   packToken& value = st->list()[1];
+  //   kwargs[key] = value;
+  // }
 
-  /* * * * * Parse keyword arguments: * * * * */
-
-  for (; args_it != args->list().end(); ++args_it) {
-    packToken& arg = *args_it;
-
-    if (arg->type != STUPLE_Token) {
-      throw syntax_error("Positional argument follows keyword argument");
-    }
-
-    STuple* st = static_cast<STuple*>(arg.token());
-
-    if (st->list().size() != 2) {
-      throw syntax_error("Keyword tuples must have exactly 2 items!");
-    }
-
-    if (st->list()[0]->type != STR_Token) {
-      throw syntax_error("Keyword first argument should be of type string!");
-    }
-
-    // Save it:
-    std::string key = st->list()[0].asString();
-    packToken& value = st->list()[1];
-    kwargs[key] = value;
-  }
-
-  /* * * * * Set missing positional arguments: * * * * */
-
-  for (; names_it != arg_names.end(); ++names_it) {
-    // If not set by a keyword argument:
-    auto kw_it = kwargs.map().find(*names_it);
-    if (kw_it == kwargs.map().end()) {
-      local[*names_it] = packToken::None();
-    } else {
-      local[*names_it] = kw_it->second;
-      kwargs.map().erase(kw_it);
-    }
-  }
+  // /* * * * * Set missing positional arguments: * * * * */
+  //
+  // for (; names_it != arg_names.end(); ++names_it) {
+  //   // If not set by a keyword argument:
+  //   auto kw_it = kwargs.map().find(*names_it);
+  //   if (kw_it == kwargs.map().end()) {
+  //     local[*names_it] = packToken::None();
+  //   } else {
+  //     local[*names_it] = kw_it->second;
+  //     kwargs.map().erase(kw_it);
+  //   }
+  // }
 
   /* * * * * Set built-in variables: * * * * */
 
   local["this"] = _this;
-  local["args"] = arglist;
-  local["kwargs"] = kwargs;
+  // local["args"] = arglist;
+  // local["kwargs"] = kwargs;
 
   return func->exec(local);
 }
