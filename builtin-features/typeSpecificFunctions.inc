@@ -65,7 +65,7 @@ packToken list_pop(TokenMap scope) {
 
   int64_t pos;
 
-  if ((*token)->type & NUM_Token) {
+  if (token && (*token)->type & NUM_Token) {
     pos = token->asInt();
 
     // So that pop(-1) is the same as pop(last_idx):

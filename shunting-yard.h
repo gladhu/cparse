@@ -443,7 +443,8 @@ struct TokenList : public Container<TokenList_t>, public Iterable {
 
   packToken& operator[](const uint64_t idx) const {
     if (list().size() <= idx) {
-      throw std::out_of_range("List index out of range!");
+      // throw std::out_of_range("List index out of range!");
+      return list()[0];
     }
     return list()[idx];
   }
@@ -680,7 +681,7 @@ class Operation {
  public:
   // Use this exception to reject an operation.
   // Without stoping the operation matching process.
-  struct Reject : public std::exception {};
+  // struct Reject : public std::exception {};
 
  public:
   static inline uint32_t mask(tokType_t type);

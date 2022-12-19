@@ -38,10 +38,12 @@ packToken Assign(const packToken& left, const packToken& right, evaluationData* 
       size_t index = key.asInt();
       list[index] = right;
     } else {
-      throw std::domain_error("Left operand of assignment is not a list!");
+      //throw std::domain_error("Left operand of assignment is not a list!");
+      return false;
     }
   } else {
-    throw undefined_operation(data->op, key, right);
+    //throw undefined_operation(data->op, key, right);
+    return false;
   }
   return right;
 }
@@ -66,7 +68,8 @@ packToken Colon(const packToken& left, const packToken& right, evaluationData* d
 
 packToken Equal(const packToken& left, const packToken& right, evaluationData* data) {
   if (left->type == VAR_Token || right->type == VAR_Token) {
-    throw undefined_operation(data->op, left, right);
+    // throw undefined_operation(data->op, left, right);
+    return false;
   }
 
   return left == right;
@@ -74,7 +77,8 @@ packToken Equal(const packToken& left, const packToken& right, evaluationData* d
 
 packToken Different(const packToken& left, const packToken& right, evaluationData* data) {
   if (left->type == VAR_Token || right->type == VAR_Token) {
-    throw undefined_operation(data->op, left, right);
+    // throw undefined_operation(data->op, left, right);
+    return true;
   }
 
   return left != right;
@@ -94,13 +98,14 @@ packToken MapIndex(const packToken& p_left, const packToken& p_right, evaluation
       return RefToken(right, packToken::None(), left);
     }
   } else {
-    throw undefined_operation(op, left, right);
+    // throw undefined_operation(op, left, right);
+    return false;
   }
 }
 
 // Resolve build-in operations for non-map types, e.g.: 'str'.len()
 packToken TypeSpecificFunction(const packToken& p_left, const packToken& p_right, evaluationData* data) {
-  if (p_left->type == MAP_Token) throw Operation::Reject();
+  if (p_left->type == MAP_Token) return false; //throw Operation::Reject();
 
   TokenMap& attr_map = calculator::type_attribute_map()[p_left->type];
   std::string& key = p_right.asString();
@@ -112,7 +117,8 @@ packToken TypeSpecificFunction(const packToken& p_left, const packToken& p_right
     // Or just read some information for example: its length.
     return RefToken(key, (*attr), p_left);
   } else {
-    throw undefined_operation(data->op, p_left, p_right);
+    // throw undefined_operation(data->op, p_left, p_right);
+    return false;
   }
 }
 
@@ -124,7 +130,8 @@ packToken UnaryNumeralOperation(const packToken& left, const packToken& right, e
   } else if (op == "-") {
     return -right.asDouble();
   } else {
-    throw undefined_operation(data->op, left, right);
+    // throw undefined_operation(data->op, left, right);
+    return false;
   }
 }
 
@@ -174,7 +181,8 @@ packToken NumeralOperation(const packToken& left, const packToken& right, evalua
   } else if (op == "||") {
     return left_i || right_i;
   } else {
-    throw undefined_operation(op, left, right);
+    // throw undefined_operation(op, left, right);
+    return false;
   }
 }
 
@@ -200,7 +208,8 @@ packToken FormatOperation(const packToken& p_left, const packToken& p_right, eva
     }
 
     if (*left == '\0') {
-      throw type_error("Not all arguments converted during string formatting");
+      // throw type_error("Not all arguments converted during string formatting");
+      return false;
     } else {
       left += 2;
     }
@@ -223,7 +232,8 @@ packToken FormatOperation(const packToken& p_left, const packToken& p_right, eva
   }
 
   if (*left != '\0') {
-    throw type_error("Not enough arguments for format string");
+    // throw type_error("Not enough arguments for format string");
+    return false;
   } else {
     return result;
   }
@@ -241,7 +251,8 @@ packToken StringOnStringOperation(const packToken& p_left, const packToken& p_ri
   } else if (op == "!=") {
     return (left != right);
   } else {
-    throw undefined_operation(op, p_left, p_right);
+    // throw undefined_operation(op, p_left, p_right);
+    return false;
   }
 }
 
@@ -261,13 +272,15 @@ packToken StringOnNumberOperation(const packToken& p_left, const packToken& p_ri
       index += left.size();
     }
     if (index < 0 || static_cast<size_t>(index) >= left.size()) {
-      throw std::domain_error("String index out of range!");
+      // throw std::domain_error("String index out of range!");
+      return ss.str();
     }
 
     ss << left[index];
     return ss.str();
   } else {
-    throw undefined_operation(op, p_left, p_right);
+    //throw undefined_operation(op, p_left, p_right);
+    return ss.str();
   }
 }
 
@@ -280,7 +293,8 @@ packToken NumberOnStringOperation(const packToken& p_left, const packToken& p_ri
     ss << left << right;
     return ss.str();
   } else {
-    throw undefined_operation(data->op, p_left, p_right);
+    // throw undefined_operation(data->op, p_left, p_right);
+    return ss.str();
   }
 }
 
@@ -296,14 +310,16 @@ packToken ListOnNumberOperation(const packToken& p_left, const packToken& p_righ
     }
 
     if (index < 0 || static_cast<size_t>(index) >= left.list().size()) {
-      throw std::domain_error("List index out of range!");
+      // throw std::domain_error("List index out of range!");
+      return false;
     }
 
     packToken& value = left.list()[index];
 
     return RefToken(index, value, p_left);
   } else {
-    throw undefined_operation(data->op, p_left, p_right);
+    // throw undefined_operation(data->op, p_left, p_right);
+    return false;
   }
 }
 
@@ -323,7 +339,8 @@ packToken ListOnListOperation(const packToken& p_left, const packToken& p_right,
 
     return result;
   } else {
-    throw undefined_operation(data->op, left, right);
+    //throw undefined_operation(data->op, left, right);
+    return false;
   }
 }
 

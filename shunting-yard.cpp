@@ -1,11 +1,8 @@
 #include "./shunting-yard.h"
-#include "./shunting-yard-exceptions.h"
 
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
-#include <exception>
 #include <string>
 #include <stack>
 #include <utility>  // For std::pair
@@ -58,11 +55,11 @@ TokenBase* exec_operation(const packToken& left, const packToken& right,
     return nullptr;
   for (const Operation& operation : it->second) {
     if (match_op_id(data->opID, operation.getMask())) {
-      try {
+      // try {
         return operation.exec(left, right, data).release();
-      } catch (...) { //const Operation::Reject& e  compile warning(may be error)
-        continue;
-      }
+      // } catch (...) { //const Operation::Reject& e  compile warning(may be error)
+      //   continue;
+      // }
     }
   }
 
@@ -188,8 +185,9 @@ void rpnBuilder::handle_op(const std::string& op) {
       this->lastTokenWasOp = op[0];
     } else {
       cleanRPN(&(this->rpn));
-      throw std::domain_error(
-          "Unrecognized unary operator: '" + op + "'.");
+      // throw std::domain_error(
+      //     "Unrecognized unary operator: '" + op + "'.");
+      return;
     }
 
   // If its a right unary operator:
@@ -207,8 +205,9 @@ void rpnBuilder::handle_op(const std::string& op) {
       handle_binary(op);
     } else {
       cleanRPN(&(rpn));
-      throw std::domain_error(
-          "Undefined operator: `" + op + "`!");
+      // throw std::domain_error(
+      //     "Undefined operator: `" + op + "`!");
+      return;
     }
 
     this->lastTokenWasUnary = false;
@@ -218,7 +217,8 @@ void rpnBuilder::handle_op(const std::string& op) {
 
 void rpnBuilder::handle_token(TokenBase* token) {
   if (lastTokenWasOp == false) {
-    throw syntax_error("Expected an operator or bracket but got " + packToken::str(token));
+    // throw syntax_error("Expected an operator or bracket but got " + packToken::str(token));
+    return;
   }
 
   rpn.push(token);
@@ -247,7 +247,8 @@ void rpnBuilder::close_bracket(const std::string& bracket) {
 
   if (opStack.size() == 0) {
     rpnBuilder::cleanRPN(&rpn);
-    throw syntax_error("Extra '" + bracket + "' on the expression!");
+    //throw syntax_error("Extra '" + bracket + "' on the expression!");
+    return;
   }
 
   opStack.pop();
@@ -269,10 +270,10 @@ struct calculator::RAII_TokenQueue_t : TokenQueue_t {
   ~RAII_TokenQueue_t() { rpnBuilder::cleanRPN(this); }
 
   RAII_TokenQueue_t(const RAII_TokenQueue_t& rpn) {
-    throw std::runtime_error("You should not copy this class!");
+    // throw std::runtime_error("You should not copy this class!");
   }
   RAII_TokenQueue_t& operator=(const RAII_TokenQueue_t& rpn) {
-    throw std::runtime_error("You should not copy this class!");
+    // throw std::runtime_error("You should not copy this class!");
   }
 };
 
@@ -290,7 +291,9 @@ TokenQueue_t calculator::toRPN(const char* expr,
   while (*expr && isspace(*expr) && !strchr(delim, *expr)) ++expr;
 
   if (*expr == '\0' || strchr(delim, *expr)) {
-    throw std::invalid_argument("Cannot build a calculator from an empty expression!");
+    // throw std::invalid_argument("Cannot build a calculator from an empty expression!");
+    static TokenQueue_t queue;
+    return queue;
   }
 
   // In one pass, ignore whitespace and parse the expression into RPN
@@ -332,12 +335,12 @@ TokenQueue_t calculator::toRPN(const char* expr,
 
       if ((parser=config.parserMap.find(key)) != nullptr) {
         // Parse reserved words:
-        try {
-          parser(expr, &expr, &data);
-        } catch (...) {
-          rpnBuilder::cleanRPN(&data.rpn);
-          throw;
-        }
+        // try {
+        parser(expr, &expr, &data);
+        // } catch (...) {
+          // rpnBuilder::cleanRPN(&data.rpn);
+        //   throw;
+        // }
       } else {
         const packToken* value = vars.find(key);
 
@@ -382,8 +385,10 @@ TokenQueue_t calculator::toRPN(const char* expr,
       if (*expr != quote) {
         std::string squote = (quote == '"' ? "\"": "'");
         rpnBuilder::cleanRPN(&data.rpn);
-        throw syntax_error("Expected quote (" + squote +
-                           ") at end of string declaration: " + squote + ss.str() + ".");
+        // throw syntax_error("Expected quote (" + squote +
+        //                    ") at end of string declaration: " + squote + ss.str() + ".");
+        TokenQueue_t queue;
+        return queue;
       }
       ++expr;
       data.handle_token(new Token<std::string>(ss.str(), STR_Token));
@@ -460,25 +465,27 @@ TokenQueue_t calculator::toRPN(const char* expr,
           // 3. Is there a character parser for its first character?
           if (parser) {
             // Parse reserved operators:
-            try {
+            // try {
               parser(expr, &expr, &data);
-            } catch (...) {
-              rpnBuilder::cleanRPN(&data.rpn);
-              throw;
-            }
+            // } catch (...) {
+            //   rpnBuilder::cleanRPN(&data.rpn);
+            //   throw;
+            // }
           } else if (data.opp.exists(op)) {
             data.handle_op(op);
           } else if ((parser = config.parserMap.find(op[0])) != nullptr) {
             expr = start+1;
-            try {
+            // try {
               parser(expr, &expr, &data);
-            } catch (...) {
-              rpnBuilder::cleanRPN(&data.rpn);
-              throw;
-            }
+            // } catch (...) {
+            //   rpnBuilder::cleanRPN(&data.rpn);
+            //   throw;
+            // }
           } else {
             rpnBuilder::cleanRPN(&data.rpn);
-            throw syntax_error("Invalid operator: " + op);
+            // throw syntax_error("Invalid operator: " + op);
+            TokenQueue_t queue;
+            return queue;
           }
         }
       }
@@ -491,7 +498,9 @@ TokenQueue_t calculator::toRPN(const char* expr,
   // Check for syntax errors (excess of operators i.e. 10 + + -1):
   if (data.lastTokenWasUnary) {
     rpnBuilder::cleanRPN(&data.rpn);
-    throw syntax_error("Expected operand after unary operator `" + data.opStack.top() + "`");
+    // throw syntax_error("Expected operand after unary operator `" + data.o
+    TokenQueue_t queue;
+    return queue;
   }
 
   std::string cur_op;
@@ -513,8 +522,14 @@ packToken calculator::calculate(const char* expr, const TokenMap &vars,
   RAII_TokenQueue_t rpn = calculator::toRPN(expr, vars, delim, rest);
 
   TokenBase* ret = calculator::calculate(rpn, vars);
-
-  return packToken(resolve_reference(ret));
+  if (ret)
+  {
+    return packToken(resolve_reference(ret));
+  }
+  else
+  {
+    return false;
+  }
 }
 
 void cleanStack(std::stack<TokenBase*> st) {
@@ -543,7 +558,8 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, const TokenMap &scope,
 
       if (evaluation.size() < 2) {
         cleanStack(evaluation);
-        throw std::domain_error("Invalid equation.");
+        // throw std::domain_error("Invalid equation.");
+        return nullptr;
       }
       TokenBase* r_token = evaluation.top(); evaluation.pop();
       TokenBase* l_token = evaluation.top(); evaluation.pop();
@@ -591,13 +607,13 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, const TokenMap &scope,
 
         // Execute the function:
         packToken ret;
-        try {
+        // try {
           ret = Function::call(_this, l_func, &right, data.scope);
-        } catch (...) {
-          cleanStack(evaluation);
-          delete l_func;
-          throw;
-        }
+        // } catch (...) {
+        //   cleanStack(evaluation);
+        //   delete l_func;
+        //   throw;
+        // }
 
         delete l_func;
         evaluation.push(ret->clone());
@@ -609,22 +625,23 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, const TokenMap &scope,
         packToken r_pack(r_token);
         TokenBase* result = 0;
 
-        try {
+        // try {
           // Resolve the operation:
           result = exec_operation(l_pack, r_pack, &data, data.op);
           if (!result) {
             result = exec_operation(l_pack, r_pack, &data, ANY_OP);
           }
-        } catch (...) {
-          cleanStack(evaluation);
-          throw;
-        }
+        // } catch (...) {
+        //   cleanStack(evaluation);
+        //   throw;
+        // }
 
         if (result) {
           evaluation.push(result);
         } else {
           cleanStack(evaluation);
-          throw undefined_operation(data.op, l_pack, r_pack);
+          return nullptr;
+          // throw undefined_operation(data.op, l_pack, r_pack);
         }
       }
     } else if (base->type == VAR_Token) {  // Variable
@@ -644,8 +661,15 @@ TokenBase* calculator::calculate(const TokenQueue_t& rpn, const TokenMap &scope,
       evaluation.push(base);
     }
   }
-
-  return evaluation.top();
+  
+  if (evaluation.empty())
+  {
+    return nullptr;
+  }
+  else
+  {
+    return evaluation.top();
+  }
 }
 
 /* * * * * Non Static Functions * * * * */
@@ -684,11 +708,18 @@ void calculator::compile(const char* expr, TokenMap &vars, const char* delim,
 
 packToken calculator::eval(const TokenMap &vars, bool keep_refs) const {
   TokenBase* value = calculate(this->RPN, vars, Config());
-  packToken p = packToken(value->clone());
-  if (keep_refs) {
-    return packToken(value);
-  } else {
-    return packToken(resolve_reference(value));
+  if (value)
+  {
+    packToken p = packToken(value->clone());
+    if (keep_refs) {
+      return packToken(value);
+    } else {
+      return packToken(resolve_reference(value));
+    }
+  }
+  else
+  {
+    return false;
   }
 }
 

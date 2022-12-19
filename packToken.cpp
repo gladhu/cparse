@@ -4,7 +4,6 @@
 
 #include "./shunting-yard.h"
 
-#include "./shunting-yard-exceptions.h"
 
 using cparse::packToken;
 using cparse::TokenBase;
@@ -60,29 +59,25 @@ std::ostream& cparse::operator<<(std::ostream &os, const packToken& t) {
 
 packToken& packToken::operator[](const std::string& key) {
   if (base->type != MAP_Token) {
-    throw bad_cast(
-      "The Token is not a map!");
+    None();
   }
   return (*static_cast<TokenMap*>(base))[key];
 }
 const packToken& packToken::operator[](const std::string& key) const {
   if (base->type != MAP_Token) {
-    throw bad_cast(
-      "The Token is not a map!");
+    None();
   }
   return (*static_cast<TokenMap*>(base))[key];
 }
 packToken& packToken::operator[](const char* key) {
   if (base->type != MAP_Token) {
-    throw bad_cast(
-      "The Token is not a map!");
+    None();
   }
   return (*static_cast<TokenMap*>(base))[key];
 }
 const packToken& packToken::operator[](const char* key) const {
   if (base->type != MAP_Token) {
-    throw bad_cast(
-      "The Token is not a map!");
+    None();
   }
   return (*static_cast<TokenMap*>(base))[key];
 }
@@ -106,7 +101,7 @@ bool packToken::asBool() const {
     case STUPLE_Token:
       return static_cast<Tuple*>(base)->list().size() != 0;
     default:
-      throw bad_cast("Token type can not be cast to boolean!");
+      return false;
   }
 }
 
@@ -119,13 +114,7 @@ double packToken::asDouble() const {
   case BOOL_Token:
     return static_cast<Token<uint8_t>*>(base)->val;
   default:
-    if (!(base->type & NUM_Token)) {
-      throw bad_cast(
-        "The Token is not a number!");
-    } else {
-      throw bad_cast(
-        "Unknown numerical type, can't convert it to double!");
-    }
+    return DBL_MAX;
   }
 }
 
@@ -138,60 +127,52 @@ int64_t packToken::asInt() const {
   case BOOL_Token:
     return static_cast<Token<uint8_t>*>(base)->val;
   default:
-    if (!(base->type & NUM_Token)) {
-      throw bad_cast(
-        "The Token is not a number!");
-    } else {
-      throw bad_cast(
-        "Unknown numerical type, can't convert it to integer!");
-    }
+    return INT64_MAX;
   }
 }
 
 std::string& packToken::asString() const {
   if (base->type != STR_Token && base->type != VAR_Token && base->type != OP_Token) {
-    throw bad_cast(
-      "The Token is not a string!");
+    static std::string empty;
+    return empty;
   }
   return static_cast<Token<std::string>*>(base)->val;
 }
 
 TokenMap& packToken::asMap() const {
   if (base->type != MAP_Token) {
-    throw bad_cast(
-      "The Token is not a map!");
+    return TokenMap::empty;
   }
   return *static_cast<TokenMap*>(base);
 }
 
 TokenList& packToken::asList() const {
   if (base->type != LIST_Token) {
-    throw bad_cast(
-      "The Token is not a list!");
+    static TokenList list;
+    return list;
   }
   return *static_cast<TokenList*>(base);
 }
 
 Tuple& packToken::asTuple() const {
   if (base->type != TUPLE_Token) {
-    throw bad_cast(
-      "The Token is not a tuple!");
+    static Tuple tuple;
+    return tuple;
   }
   return *static_cast<Tuple*>(base);
 }
 
 STuple& packToken::asSTuple() const {
   if (base->type != STUPLE_Token) {
-    throw bad_cast(
-      "The Token is not an special tuple!");
+    static STuple stuple;
+    return stuple;
   }
   return *static_cast<STuple*>(base);
 }
 
 Function* packToken::asFunc() const {
   if (base->type != FUNC_Token) {
-    throw bad_cast(
-      "The Token is not a function!");
+    return nullptr;
   }
   return static_cast<Function*>(base);
 }
@@ -199,8 +180,7 @@ Function* packToken::asFunc() const {
 void* packToken::asPoint() const
 {
   if (base->type != POINT_Token) {
-    throw bad_cast(
-      "The Token is not a function!");
+    return nullptr;
   }
   return (static_cast<Token<void *>*>(base))->val;
 }

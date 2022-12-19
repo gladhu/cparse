@@ -166,7 +166,6 @@
     <ClInclude Include="builtin-features\operations.inc" />
     <ClInclude Include="builtin-features\reservedWords.inc" />
     <ClInclude Include="builtin-features\typeSpecificFunctions.inc" />
-    <ClInclude Include="shunting-yard-exceptions.h" />
     <ClInclude Include="shunting-yard.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

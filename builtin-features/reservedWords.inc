@@ -26,7 +26,8 @@ void LineComment(const char* expr, const char** rest, rpnBuilder* data) {
 void SlashStarComment(const char* expr, const char** rest, rpnBuilder* data) {
   while (*expr && !(expr[0] == '*' && expr[1] == '/')) ++expr;
   if (*expr == '\0') {
-    throw syntax_error("Unexpected end of file after '/*' comment!");
+    // throw syntax_error("Unexpected end of file after '/*' comment!");
+    return;
   }
   // Drop the characters `*/`:
   expr += 2;
@@ -48,7 +49,8 @@ void DotOperator(const char* expr, const char** rest, rpnBuilder* data) {
 
   // If it did not find a valid variable name after it:
   if (!rpnBuilder::isvarchar(*expr)) {
-    throw syntax_error("Expected variable name after '.' operator");
+    //throw syntax_error("Expected variable name after '.' operator");
+    return;
   }
 
   // Parse the variable name and save it as a string:

@@ -157,7 +157,7 @@ void TokenMap::assign(std::string key, TokenBase* value) {
   if (value) {
     value = value->clone();
   } else {
-    throw std::invalid_argument("TokenMap assignment expected a non NULL argument as value!");
+    //throw std::invalid_argument("TokenMap assignment expected a non NULL argument as value!");
   }
 
   packToken* variable = find(key);

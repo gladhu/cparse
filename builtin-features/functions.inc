@@ -61,9 +61,11 @@ packToken default_float(TokenMap scope) {
   double ret = strtod(str.c_str(), &rest);
 
   if (str == rest) {
-    throw std::runtime_error("Could not convert \"" + str + "\" to float!");
+    //throw std::runtime_error("Could not convert \"" + str + "\" to float!");
+    return false;
   } else if (errno) {
-    std::range_error("Value too big or too small to fit a Double!");
+    // std::range_error("Value too big or too small to fit a Double!");
+    return false;
   }
   return ret;
 }
@@ -79,9 +81,11 @@ packToken default_int(TokenMap scope) {
   int64_t ret = strtol(str.c_str(), &rest, 10);
 
   if (str == rest) {
-    throw std::runtime_error("Could not convert \"" + str + "\" to integer!");
+    // throw std::runtime_error("Could not convert \"" + str + "\" to integer!");
+    return false;
   } else if (errno) {
-    std::range_error("Value too big or too small to fit an Integer!");
+    // std::range_error("Value too big or too small to fit an Integer!");
+    return false;
   }
   return ret;
 }
@@ -196,7 +200,8 @@ packToken default_extend(TokenMap scope) {
   if (tok->type == MAP_Token) {
     return tok.asMap().getChild();
   } else {
-    throw std::runtime_error(tok.str() + " is not extensible!");
+    // throw std::runtime_error(tok.str() + " is not extensible!");
+    return false;
   }
 }
 
